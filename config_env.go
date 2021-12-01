@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -13,33 +14,37 @@ type envConfig struct {
 	data  map[string]interface{}
 }
 
+func (this *envConfig) err(pattern string, params ...interface{}) error {
+	return errors.New(fmt.Sprintf("[EnvConfig]: "+pattern, params...))
+}
+
 // Load configurations
-func (c *envConfig) Load() bool {
-	if godotenv.Overload(c.Files...) != nil {
-		return false
+func (this *envConfig) Load() error {
+	if err := godotenv.Overload(this.Files...); err != nil {
+		return this.err(err.Error())
 	}
-	if c.data == nil {
-		c.data = make(map[string]interface{})
+	if this.data == nil {
+		this.data = make(map[string]interface{})
 	} else {
-		for k, v := range c.data {
+		for k, v := range this.data {
 			os.Setenv(k, fmt.Sprintf("%v", v))
 		}
 	}
-	return true
+	return nil
 }
 
 // Set configuration
-// return false if driver not support set or error happend
-func (c *envConfig) Set(key string, value interface{}) bool {
-	c.data[key] = value
-	if os.Setenv(key, fmt.Sprintf("%v", value)) != nil {
-		return false
+// return error if driver not support set or error happend
+func (this *envConfig) Set(key string, value interface{}) error {
+	this.data[key] = value
+	if err := os.Setenv(key, fmt.Sprintf("%v", value)); err != nil {
+		return this.err(err.Error())
 	}
-	return true
+	return nil
 }
 
 // Get configuration
-func (c *envConfig) Get(key string) interface{} {
+func (envConfig) Get(key string) interface{} {
 	if v, ok := os.LookupEnv(key); ok {
 		return v
 	}
@@ -47,7 +52,7 @@ func (c *envConfig) Get(key string) interface{} {
 }
 
 // Exists check if config item exists
-func (c *envConfig) Exists(key string) bool {
+func (envConfig) Exists(key string) bool {
 	if _, ok := os.LookupEnv(key); ok {
 		return true
 	}
@@ -55,7 +60,7 @@ func (c *envConfig) Exists(key string) bool {
 }
 
 // Bool parse dependency as boolean
-func (c *envConfig) Bool(key string, fallback bool) bool {
+func (envConfig) Bool(key string, fallback bool) bool {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseBool(val); err == nil {
 			return res
@@ -65,7 +70,7 @@ func (c *envConfig) Bool(key string, fallback bool) bool {
 }
 
 // Int parse dependency as int
-func (c *envConfig) Int(key string, fallback int) int {
+func (envConfig) Int(key string, fallback int) int {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseInt(val, 10, 64); err == nil {
 			return int(res)
@@ -75,7 +80,7 @@ func (c *envConfig) Int(key string, fallback int) int {
 }
 
 // Int8 parse dependency as int8
-func (c *envConfig) Int8(key string, fallback int8) int8 {
+func (envConfig) Int8(key string, fallback int8) int8 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseInt(val, 10, 64); err == nil {
 			return int8(res)
@@ -85,7 +90,7 @@ func (c *envConfig) Int8(key string, fallback int8) int8 {
 }
 
 // Int16 parse dependency as int16
-func (c *envConfig) Int16(key string, fallback int16) int16 {
+func (envConfig) Int16(key string, fallback int16) int16 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseInt(val, 10, 64); err == nil {
 			return int16(res)
@@ -95,7 +100,7 @@ func (c *envConfig) Int16(key string, fallback int16) int16 {
 }
 
 // Int32 parse dependency as int32
-func (c *envConfig) Int32(key string, fallback int32) int32 {
+func (envConfig) Int32(key string, fallback int32) int32 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseInt(val, 10, 64); err == nil {
 			return int32(res)
@@ -105,7 +110,7 @@ func (c *envConfig) Int32(key string, fallback int32) int32 {
 }
 
 // Int64 parse dependency as int64
-func (c *envConfig) Int64(key string, fallback int64) int64 {
+func (envConfig) Int64(key string, fallback int64) int64 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseInt(val, 10, 64); err == nil {
 			return int64(res)
@@ -115,7 +120,7 @@ func (c *envConfig) Int64(key string, fallback int64) int64 {
 }
 
 // UInt parse dependency as uint
-func (c *envConfig) UInt(key string, fallback uint) uint {
+func (envConfig) UInt(key string, fallback uint) uint {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseUint(val, 10, 64); err == nil {
 			return uint(res)
@@ -125,7 +130,7 @@ func (c *envConfig) UInt(key string, fallback uint) uint {
 }
 
 // UInt8 parse dependency as uint8
-func (c *envConfig) UInt8(key string, fallback uint8) uint8 {
+func (envConfig) UInt8(key string, fallback uint8) uint8 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseUint(val, 10, 64); err == nil {
 			return uint8(res)
@@ -135,7 +140,7 @@ func (c *envConfig) UInt8(key string, fallback uint8) uint8 {
 }
 
 // UInt16 parse dependency as uint16
-func (c *envConfig) UInt16(key string, fallback uint16) uint16 {
+func (envConfig) UInt16(key string, fallback uint16) uint16 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseUint(val, 10, 64); err == nil {
 			return uint16(res)
@@ -145,7 +150,7 @@ func (c *envConfig) UInt16(key string, fallback uint16) uint16 {
 }
 
 // UInt32 parse dependency as uint32
-func (c *envConfig) UInt32(key string, fallback uint32) uint32 {
+func (envConfig) UInt32(key string, fallback uint32) uint32 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseUint(val, 10, 64); err == nil {
 			return uint32(res)
@@ -155,7 +160,7 @@ func (c *envConfig) UInt32(key string, fallback uint32) uint32 {
 }
 
 // UInt64 parse dependency as uint64
-func (c *envConfig) UInt64(key string, fallback uint64) uint64 {
+func (envConfig) UInt64(key string, fallback uint64) uint64 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseUint(val, 10, 64); err == nil {
 			return uint64(res)
@@ -165,7 +170,7 @@ func (c *envConfig) UInt64(key string, fallback uint64) uint64 {
 }
 
 // Float32 parse dependency as float64
-func (c *envConfig) Float32(key string, fallback float32) float32 {
+func (envConfig) Float32(key string, fallback float32) float32 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseFloat(val, 64); err == nil {
 			return float32(res)
@@ -175,7 +180,7 @@ func (c *envConfig) Float32(key string, fallback float32) float32 {
 }
 
 // Float64 parse dependency as float64
-func (c *envConfig) Float64(key string, fallback float64) float64 {
+func (envConfig) Float64(key string, fallback float64) float64 {
 	if val, ok := os.LookupEnv(key); ok {
 		if res, err := strconv.ParseFloat(val, 64); err == nil {
 			return res
@@ -185,7 +190,7 @@ func (c *envConfig) Float64(key string, fallback float64) float64 {
 }
 
 // String parse dependency as string
-func (c *envConfig) String(key string, fallback string) string {
+func (envConfig) String(key string, fallback string) string {
 	if val, ok := os.LookupEnv(key); ok {
 		return val
 	}

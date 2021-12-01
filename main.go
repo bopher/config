@@ -1,29 +1,31 @@
 package config
 
 // NewEnvConfig create a new env file configuration manager instance
-func NewEnvConfig(filenames ...string) (Config, bool) {
+func NewEnvConfig(filenames ...string) (Config, error) {
 	ec := &envConfig{Files: filenames}
-	if ec.Load() {
-		return ec, true
+	if err := ec.Load(); err != nil {
+		return nil, err
+	} else {
+		return ec, nil
 	}
-	return nil, false
 }
 
 // NewJSONConfig create a new json file configuration manager instance
-func NewJSONConfig(filenames ...string) (Config, bool) {
+func NewJSONConfig(filenames ...string) (Config, error) {
 	jc := &jsonConfig{Files: filenames}
-	if jc.Load() {
-		return jc, true
+	if err := jc.Load(); err != nil {
+		return nil, err
+	} else {
+		return jc, nil
 	}
-	return nil, false
 }
 
 // NewMemoryConfig create a new in-memory configuration manager instance
-func NewMemoryConfig(config map[string]interface{}) (Config, bool) {
+func NewMemoryConfig(config map[string]interface{}) (Config, error) {
 	mc := new(memoryConfig)
-	mc.Load()
-	if config != nil {
-		mc.data = config
+	if err := mc.Load(); err != nil {
+		return nil, err
+	} else {
+		return mc, nil
 	}
-	return mc, true
 }

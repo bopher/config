@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -14,12 +16,16 @@ type jsonConfig struct {
 	data  map[string]interface{}
 }
 
-func (c *jsonConfig) fetch(key string) (interface{}, bool, bool) {
-	if v, ok := c.data[key]; ok {
+func (this *jsonConfig) err(pattern string, params ...interface{}) error {
+	return errors.New(fmt.Sprintf("[JsonConfig]: "+pattern, params...))
+}
+
+func (this *jsonConfig) fetch(key string) (interface{}, bool, bool) {
+	if v, ok := this.data[key]; ok {
 		return v, false, true
 	}
 
-	if val := gjson.Get(c.json, key); val.Exists() {
+	if val := gjson.Get(this.json, key); val.Exists() {
 		return val, true, true
 	}
 
@@ -27,52 +33,53 @@ func (c *jsonConfig) fetch(key string) (interface{}, bool, bool) {
 }
 
 // Load configurations
-func (c *jsonConfig) Load() bool {
-	if c.data == nil {
-		c.data = make(map[string]interface{})
+func (this *jsonConfig) Load() error {
+	if this.data == nil {
+		this.data = make(map[string]interface{})
 	}
+
 	contents := make([]string, 0)
-	for _, f := range c.Files {
+	for _, f := range this.Files {
 		bytes, err := ioutil.ReadFile(f)
 		if err != nil {
-			return false
+			return this.err(err.Error())
 		}
 		content := string(bytes)
 		if !gjson.Valid(content) {
-			return false
+			return errors.New(fmt.Sprintf("%s content is invalid!", f))
 		}
 
 		fileName := filepath.Base(f)
 		fileName = strings.TrimSuffix(fileName, filepath.Ext(fileName))
 
-		if len(c.Files) > 1 {
+		if len(this.Files) > 1 {
 			contents = append(contents, `"`+fileName+`":`+content)
 		} else {
 			contents = append(contents, content)
 		}
 
 	}
-	if len(c.Files) > 1 {
-		c.json = "{" + strings.Join(contents, ",") + "}"
+	if len(this.Files) > 1 {
+		this.json = "{" + strings.Join(contents, ",") + "}"
 	} else {
 		if !strings.HasPrefix(contents[0], "{") {
 			contents[0] = "{" + contents[0] + "}"
 		}
-		c.json = contents[0]
+		this.json = contents[0]
 	}
-	return true
+	return nil
 }
 
 // Set configuration
-// return false if driver not support set or error happend
-func (c *jsonConfig) Set(key string, value interface{}) bool {
-	c.data[key] = value
-	return true
+// return error if driver not support set or error happend
+func (this *jsonConfig) Set(key string, value interface{}) error {
+	this.data[key] = value
+	return nil
 }
 
 // Get configuration
-func (c *jsonConfig) Get(key string) interface{} {
-	if v, isJSON, exists := c.fetch(key); !exists {
+func (this jsonConfig) Get(key string) interface{} {
+	if v, isJSON, exists := this.fetch(key); !exists {
 		return nil
 	} else if isJSON {
 		return v.(gjson.Result).Value()
@@ -82,14 +89,14 @@ func (c *jsonConfig) Get(key string) interface{} {
 }
 
 // Exists check if config item exists
-func (c *jsonConfig) Exists(key string) bool {
-	_, _, exists := c.fetch(key)
+func (this jsonConfig) Exists(key string) bool {
+	_, _, exists := this.fetch(key)
 	return exists
 }
 
 // Bool parse dependency as boolean
-func (c *jsonConfig) Bool(key string, fallback bool) bool {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Bool(key string, fallback bool) bool {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.False || val.Type == gjson.True {
@@ -105,8 +112,8 @@ func (c *jsonConfig) Bool(key string, fallback bool) bool {
 }
 
 // Int parse dependency as int
-func (c *jsonConfig) Int(key string, fallback int) int {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Int(key string, fallback int) int {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -122,8 +129,8 @@ func (c *jsonConfig) Int(key string, fallback int) int {
 }
 
 // Int8 parse dependency as int8
-func (c *jsonConfig) Int8(key string, fallback int8) int8 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Int8(key string, fallback int8) int8 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -139,8 +146,8 @@ func (c *jsonConfig) Int8(key string, fallback int8) int8 {
 }
 
 // Int16 parse dependency as int16
-func (c *jsonConfig) Int16(key string, fallback int16) int16 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Int16(key string, fallback int16) int16 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -156,8 +163,8 @@ func (c *jsonConfig) Int16(key string, fallback int16) int16 {
 }
 
 // Int32 parse dependency as int32
-func (c *jsonConfig) Int32(key string, fallback int32) int32 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Int32(key string, fallback int32) int32 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -173,8 +180,8 @@ func (c *jsonConfig) Int32(key string, fallback int32) int32 {
 }
 
 // Int64 parse dependency as int64
-func (c *jsonConfig) Int64(key string, fallback int64) int64 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Int64(key string, fallback int64) int64 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -190,8 +197,8 @@ func (c *jsonConfig) Int64(key string, fallback int64) int64 {
 }
 
 // UInt parse dependency as uint
-func (c *jsonConfig) UInt(key string, fallback uint) uint {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) UInt(key string, fallback uint) uint {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -207,8 +214,8 @@ func (c *jsonConfig) UInt(key string, fallback uint) uint {
 }
 
 // UInt8 parse dependency as uint8
-func (c *jsonConfig) UInt8(key string, fallback uint8) uint8 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) UInt8(key string, fallback uint8) uint8 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -224,8 +231,8 @@ func (c *jsonConfig) UInt8(key string, fallback uint8) uint8 {
 }
 
 // UInt16 parse dependency as uint16
-func (c *jsonConfig) UInt16(key string, fallback uint16) uint16 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) UInt16(key string, fallback uint16) uint16 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -241,8 +248,8 @@ func (c *jsonConfig) UInt16(key string, fallback uint16) uint16 {
 }
 
 // UInt32 parse dependency as uint32
-func (c *jsonConfig) UInt32(key string, fallback uint32) uint32 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) UInt32(key string, fallback uint32) uint32 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -258,8 +265,8 @@ func (c *jsonConfig) UInt32(key string, fallback uint32) uint32 {
 }
 
 // UInt64 parse dependency as uint64
-func (c *jsonConfig) UInt64(key string, fallback uint64) uint64 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) UInt64(key string, fallback uint64) uint64 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -275,8 +282,8 @@ func (c *jsonConfig) UInt64(key string, fallback uint64) uint64 {
 }
 
 // Float32 parse dependency as float64
-func (c *jsonConfig) Float32(key string, fallback float32) float32 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Float32(key string, fallback float32) float32 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -292,8 +299,8 @@ func (c *jsonConfig) Float32(key string, fallback float32) float32 {
 }
 
 // Float64 parse dependency as float64
-func (c *jsonConfig) Float64(key string, fallback float64) float64 {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) Float64(key string, fallback float64) float64 {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.Number {
@@ -309,8 +316,8 @@ func (c *jsonConfig) Float64(key string, fallback float64) float64 {
 }
 
 // String parse dependency as string
-func (c *jsonConfig) String(key string, fallback string) string {
-	if v, isJSON, exists := c.fetch(key); exists {
+func (this jsonConfig) String(key string, fallback string) string {
+	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.String {

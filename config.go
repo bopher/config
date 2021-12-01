@@ -3,13 +3,13 @@ package config
 // Config is the interface for configuration manager drivers.
 type Config interface {
 	// Load configurations
-	Load() bool
+	Load() error
 	// Set configuration
-	// return false if driver not support set or error happend
+	// return error if driver not support set or error happend
 	// set override local configuration
-	Set(key string, value interface{}) bool
+	Set(key string, value interface{}) error
 	// Get configuration
-	// return nil, false if value not exists
+	// return nil if value not exists
 	Get(key string) interface{}
 	// Exists check if config item exists
 	Exists(key string) bool
