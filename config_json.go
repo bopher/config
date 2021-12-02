@@ -1,12 +1,12 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 
+	"github.com/bopher/utils"
 	"github.com/tidwall/gjson"
 )
 
@@ -16,8 +16,8 @@ type jsonConfig struct {
 	data  map[string]interface{}
 }
 
-func (this *jsonConfig) err(pattern string, params ...interface{}) error {
-	return errors.New(fmt.Sprintf("[JsonConfig]: "+pattern, params...))
+func (jsonConfig) err(format string, args ...interface{}) error {
+	return utils.TaggedError([]string{"JSONConfig"}, format, args...)
 }
 
 func (this *jsonConfig) fetch(key string) (interface{}, bool, bool) {
@@ -32,7 +32,6 @@ func (this *jsonConfig) fetch(key string) (interface{}, bool, bool) {
 	return nil, false, false
 }
 
-// Load configurations
 func (this *jsonConfig) Load() error {
 	if this.data == nil {
 		this.data = make(map[string]interface{})
@@ -46,7 +45,7 @@ func (this *jsonConfig) Load() error {
 		}
 		content := string(bytes)
 		if !gjson.Valid(content) {
-			return errors.New(fmt.Sprintf("%s content is invalid!", f))
+			return this.err(fmt.Sprintf("%s content is invalid!", f))
 		}
 
 		fileName := filepath.Base(f)
@@ -70,14 +69,11 @@ func (this *jsonConfig) Load() error {
 	return nil
 }
 
-// Set configuration
-// return error if driver not support set or error happend
 func (this *jsonConfig) Set(key string, value interface{}) error {
 	this.data[key] = value
 	return nil
 }
 
-// Get configuration
 func (this jsonConfig) Get(key string) interface{} {
 	if v, isJSON, exists := this.fetch(key); !exists {
 		return nil
@@ -88,246 +84,294 @@ func (this jsonConfig) Get(key string) interface{} {
 	}
 }
 
-// Exists check if config item exists
 func (this jsonConfig) Exists(key string) bool {
 	_, _, exists := this.fetch(key)
 	return exists
 }
 
-// Bool parse dependency as boolean
+func (this jsonConfig) BoolE(key string) (bool, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastBoolE(v); err != nil {
+			return false, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return false, this.err("failed to get %s as bool.", key)
+}
+
 func (this jsonConfig) Bool(key string, fallback bool) bool {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.False || val.Type == gjson.True {
-				return val.Bool()
-			}
-		} else {
-			if val, ok := v.(bool); ok {
-				return val
-			}
-		}
+	if v, err := this.BoolE(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// Int parse dependency as int
+func (this jsonConfig) IntE(key string) (int, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastIntE(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as int.", key)
+}
+
 func (this jsonConfig) Int(key string, fallback int) int {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return int(val.Int())
-			}
-		} else {
-			if val, ok := v.(int); ok {
-				return val
-			}
-		}
+	if v, err := this.IntE(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// Int8 parse dependency as int8
+func (this jsonConfig) Int8E(key string) (int8, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastInt8E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as int8.", key)
+}
+
 func (this jsonConfig) Int8(key string, fallback int8) int8 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return int8(val.Int())
-			}
-		} else {
-			if val, ok := v.(int8); ok {
-				return val
-			}
-		}
+	if v, err := this.Int8E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// Int16 parse dependency as int16
+func (this jsonConfig) Int16E(key string) (int16, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastInt16E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as int16.", key)
+}
+
 func (this jsonConfig) Int16(key string, fallback int16) int16 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return int16(val.Int())
-			}
-		} else {
-			if val, ok := v.(int16); ok {
-				return val
-			}
-		}
+	if v, err := this.Int16E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// Int32 parse dependency as int32
+func (this jsonConfig) Int32E(key string) (int32, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastInt32E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as int32.", key)
+}
+
 func (this jsonConfig) Int32(key string, fallback int32) int32 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return int32(val.Int())
-			}
-		} else {
-			if val, ok := v.(int32); ok {
-				return val
-			}
-		}
+	if v, err := this.Int32E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// Int64 parse dependency as int64
+func (this jsonConfig) Int64E(key string) (int64, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastInt64E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as int64.", key)
+}
+
 func (this jsonConfig) Int64(key string, fallback int64) int64 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return int64(val.Int())
-			}
-		} else {
-			if val, ok := v.(int64); ok {
-				return val
-			}
-		}
+	if v, err := this.Int64E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// UInt parse dependency as uint
+func (this jsonConfig) UIntE(key string) (uint, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastUIntE(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as uint.", key)
+}
+
 func (this jsonConfig) UInt(key string, fallback uint) uint {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return uint(val.Uint())
-			}
-		} else {
-			if val, ok := v.(uint); ok {
-				return val
-			}
-		}
+	if v, err := this.UIntE(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// UInt8 parse dependency as uint8
+func (this jsonConfig) UInt8E(key string) (uint8, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastUInt8E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as uint8.", key)
+}
+
 func (this jsonConfig) UInt8(key string, fallback uint8) uint8 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return uint8(val.Uint())
-			}
-		} else {
-			if val, ok := v.(uint8); ok {
-				return val
-			}
-		}
+	if v, err := this.UInt8E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// UInt16 parse dependency as uint16
+func (this jsonConfig) UInt16E(key string) (uint16, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastUInt16E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as uint16.", key)
+}
+
 func (this jsonConfig) UInt16(key string, fallback uint16) uint16 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return uint16(val.Uint())
-			}
-		} else {
-			if val, ok := v.(uint16); ok {
-				return val
-			}
-		}
+	if v, err := this.UInt16E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// UInt32 parse dependency as uint32
+func (this jsonConfig) UInt32E(key string) (uint32, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastUInt32E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as uint32.", key)
+}
+
 func (this jsonConfig) UInt32(key string, fallback uint32) uint32 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return uint32(val.Uint())
-			}
-		} else {
-			if val, ok := v.(uint32); ok {
-				return val
-			}
-		}
+	if v, err := this.UInt32E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// UInt64 parse dependency as uint64
+func (this jsonConfig) UInt64E(key string) (uint64, error) {
+	if v, isJSON, exists := this.fetch(key); exists {
+		if isJSON {
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastUInt64E(v); err != nil {
+			return 0, this.err(err.Error())
+		} else {
+			return v, nil
+		}
+	}
+	return 0, this.err("failed to get %s as uint64.", key)
+}
+
 func (this jsonConfig) UInt64(key string, fallback uint64) uint64 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return uint64(val.Uint())
-			}
-		} else {
-			if val, ok := v.(uint64); ok {
-				return val
-			}
-		}
+	if v, err := this.UInt64E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// Float32 parse dependency as float64
-func (this jsonConfig) Float32(key string, fallback float32) float32 {
+func (this jsonConfig) Float64E(key string) (float64, error) {
 	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return float32(val.Float())
-			}
+			v = v.(gjson.Result).Raw
+		}
+
+		if v, err := utils.CastFloat64E(v); err != nil {
+			return 0, this.err(err.Error())
 		} else {
-			if val, ok := v.(float32); ok {
-				return val
-			}
+			return v, nil
 		}
 	}
-	return fallback
+	return 0, this.err("failed to get %s as float64.", key)
 }
 
-// Float64 parse dependency as float64
 func (this jsonConfig) Float64(key string, fallback float64) float64 {
-	if v, isJSON, exists := this.fetch(key); exists {
-		if isJSON {
-			val := v.(gjson.Result)
-			if val.Type == gjson.Number {
-				return val.Float()
-			}
-		} else {
-			if val, ok := v.(float64); ok {
-				return val
-			}
-		}
+	if v, err := this.Float64E(key); err == nil {
+		return v
 	}
 	return fallback
 }
 
-// String parse dependency as string
-func (this jsonConfig) String(key string, fallback string) string {
+func (this jsonConfig) StringE(key string) (string, error) {
 	if v, isJSON, exists := this.fetch(key); exists {
 		if isJSON {
 			val := v.(gjson.Result)
 			if val.Type == gjson.String {
-				return val.String()
+				return val.String(), nil
 			}
 		} else {
 			if val, ok := v.(string); ok {
-				return val
+				return val, nil
 			}
 		}
+	}
+	return "", this.err("failed cast %s as string!", key)
+}
+
+func (this jsonConfig) String(key string, fallback string) string {
+	if v, err := this.StringE(key); err == nil {
+		return v
 	}
 	return fallback
 }
