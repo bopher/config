@@ -1,7 +1,7 @@
 github.com/bopher/caster v1.0.0 h1:27D3cRSo+SoKViKWdAxdzLgJ/bUEnmzrUb5tiawEp6Q=
 github.com/bopher/caster v1.0.0/go.mod h1:/qhmQ8ZD4At5B5q+bVkomyvBxcBL1MHwgHGZQehrbwU=
-github.com/bopher/utils v1.4.0 h1:owa+710zj3xjhhAR48DAT7bGLOvhUrjRJEoQ+xRqeUg=
-github.com/bopher/utils v1.4.0/go.mod h1:nnNq+9ldOKopW0U5U2iG8ZAPwgWkYWZV6Yvc2zgHgKI=
+github.com/bopher/utils v1.5.0 h1:Bug8HwGHRI0EYaB4UNAyajDUEC6HRlxKAvNq71r2X28=
+github.com/bopher/utils v1.5.0/go.mod h1:nnNq+9ldOKopW0U5U2iG8ZAPwgWkYWZV6Yvc2zgHgKI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

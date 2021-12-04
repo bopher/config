@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/bopher/caster v1.0.0
-	github.com/bopher/utils v1.4.0
+	github.com/bopher/utils v1.5.0
 	github.com/joho/godotenv v1.4.0
 	github.com/tidwall/gjson v1.12.1
 )
