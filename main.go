@@ -21,7 +21,7 @@ func NewJSONConfig(filenames ...string) (Config, error) {
 }
 
 // NewMemoryConfig create a new in-memory configuration manager instance
-func NewMemoryConfig(config map[string]interface{}) (Config, error) {
+func NewMemoryConfig(config map[string]any) (Config, error) {
 	mc := new(memoryConfig)
 	if config != nil {
 		mc.data = config

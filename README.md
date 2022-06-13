@@ -34,7 +34,7 @@ Use in-memory array for keeping and managing configuration.
 
 ```go
 import "github.com/bopher/config"
-memConf, err := config.NewMemoryConfig(map[string]interface{}{
+memConf, err := config.NewMemoryConfig(map[string]any{
     "name": "My First App",
     "key": "My Secret Key",
 })
@@ -62,7 +62,7 @@ Set configuration item. this function override preloaded config.
 
 ```go
 // Signature:
-Set(key string, value interface{}) error
+Set(key string, value any) error
 
 // Example
 err := memConf.Set("name", "My App")
@@ -80,11 +80,11 @@ err = jsonConf.Set("file1.app.title", "Some")
 
 ### Get
 
-Get configuration. Get function return config item as `interface{}`. if you need get config with type use helper get functions described later.
+Get configuration. Get function return config item as `any`. if you need get config with type use helper get functions described later.
 
 ```go
 // Signature:
-Get(key string) interface{}
+Get(key string) any
 ```
 
 **Caution:** For `JSON` driver with multiple file you must pass filename as first part of config path!

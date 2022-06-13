@@ -11,11 +11,11 @@ type Config interface {
 	// return error if driver not support set or error happend
 	//
 	// set override local configuration
-	Set(key string, value interface{}) error
+	Set(key string, value any) error
 	// Get configuration
 	//
 	// return nil if value not exists
-	Get(key string) interface{}
+	Get(key string) any
 	// Exists check if config item exists
 	Exists(key string) bool
 	// Cast parse config as caster

@@ -11,24 +11,24 @@ import (
 
 type envConfig struct {
 	Files []string
-	data  map[string]interface{}
+	data  map[string]any
 }
 
-func (envConfig) err(format string, args ...interface{}) error {
+func (envConfig) err(format string, args ...any) error {
 	return utils.TaggedError([]string{"EnvConfig"}, format, args...)
 }
 
-func (this *envConfig) Load() error {
-	if this.data == nil {
-		this.data = make(map[string]interface{})
+func (ec *envConfig) Load() error {
+	if ec.data == nil {
+		ec.data = make(map[string]any)
 	}
 
-	if err := godotenv.Overload(this.Files...); err != nil {
-		return this.err(err.Error())
+	if err := godotenv.Overload(ec.Files...); err != nil {
+		return ec.err(err.Error())
 	}
 
-	for k, v := range this.data {
-		if err := this.Set(k, v); err != nil {
+	for k, v := range ec.data {
+		if err := ec.Set(k, v); err != nil {
 			return err
 		}
 	}
@@ -36,15 +36,15 @@ func (this *envConfig) Load() error {
 	return nil
 }
 
-func (this *envConfig) Set(key string, value interface{}) error {
-	this.data[key] = value
+func (ec *envConfig) Set(key string, value any) error {
+	ec.data[key] = value
 	if err := os.Setenv(key, fmt.Sprintf("%v", value)); err != nil {
-		return this.err(err.Error())
+		return ec.err(err.Error())
 	}
 	return nil
 }
 
-func (envConfig) Get(key string) interface{} {
+func (envConfig) Get(key string) any {
 	if v, ok := os.LookupEnv(key); ok {
 		return v
 	}
@@ -58,6 +58,6 @@ func (envConfig) Exists(key string) bool {
 	return false
 }
 
-func (this envConfig) Cast(key string) caster.Caster {
-	return caster.NewCaster(this.Get(key))
+func (ec envConfig) Cast(key string) caster.Caster {
+	return caster.NewCaster(ec.Get(key))
 }
