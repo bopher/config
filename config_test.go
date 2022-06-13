@@ -35,7 +35,7 @@ func TestJsonConfig(t *testing.T) {
 }
 
 func TestMemConfig(t *testing.T) {
-	env, err := config.NewMemoryConfig(map[string]interface{}{
+	env, err := config.NewMemoryConfig(map[string]any{
 		"title": "My App",
 	})
 	if err != nil {
