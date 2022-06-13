@@ -1,5 +1,5 @@
-github.com/bopher/caster v1.2.2 h1:HBtjJIx8KSGDXokVpPf1O5yqjCt5bvDC3PrwVbLiIz0=
-github.com/bopher/caster v1.2.2/go.mod h1:ymHF2X9x1kwvRJvR+8sLuAk3PyOmckq90eQ3Eb85BSU=
+github.com/bopher/caster v1.2.3 h1:Ucqy8Vb7k9E234SsBOrL5ozRcXZaMBnWQlq0DiK2txQ=
+github.com/bopher/caster v1.2.3/go.mod h1:ymHF2X9x1kwvRJvR+8sLuAk3PyOmckq90eQ3Eb85BSU=
 github.com/bopher/utils v1.7.3 h1:Yeo3gEzCamYIMsb7D6Bo7dwfnpT2MAonD8HxvjFE4wI=
 github.com/bopher/utils v1.7.3/go.mod h1:XqATdAR/qq9SAbDrkIG6Dx2DFsBo/ldwGfx9za+8J64=
 github.com/gabriel-vasile/mimetype v1.4.0 h1:Cn9dkdYsMIu56tGho+fqzh7XmvY2YyGU0FnbhiOsEro=
